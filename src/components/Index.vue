@@ -41,7 +41,7 @@
 </template>
 
 <script>
-    import {Row, Col, Card, Icon, Input, TabPane, Tabs, Button, Message} from 'iview'
+    import {Row, Col, Card, Icon, Input, TabPane, Tabs, Button, Message, Spin} from 'iview'
     import cmEcharts from './echarts'
 
     export default {
@@ -69,12 +69,14 @@
         },
         methods: {
             pushImg() {
+                Spin.show()
                 this.imgList = []
                 // captcha_url= https://uac.10010.com/portal/Service/CreateImage &loops=2
                 this.axios.post(`/api/upload`, {
                     captcha_url: this.imgUrl,
                     loops: this.imgNum
                 }).then(res => {
+                    Spin.hide()
                     this.correct_data.data = [
                         {
                             name: '正确率',
@@ -83,17 +85,21 @@
                     ]
                     this.imgList = res.data
                     this.isSave = false
+                }, () => {
+                    Spin.hide()
                 })
             },
             imgChange(item) {
                 item.changes = true
             },
             saveImg() {
+                Spin.show()
                 this.isSave = true
                 let data = this.imgList.filter(v => v.changes)
                 this.axios.post(`/api/remark_captcha`, {
                     data: data
                 }).then(res => {
+                    Spin.hide()
                     this.correct_data.data = [
                         {
                             name: '正确率',
@@ -105,6 +111,8 @@
                         }
                     ]
                     Message.info(res.data.message)
+                }, () => {
+                    Spin.hide()
                 })
             }
         },
