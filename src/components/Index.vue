@@ -18,7 +18,7 @@
                                         v-model="imgUrl"
                                         filterable
                                         transfer
-                                        placeholder="请输入URL"
+                                        placeholder="请输入或选择URL"
                                 >
                                     <Option
                                             v-for="item in urlList"
@@ -108,10 +108,23 @@
         },
         methods: {
             pushImg() {
+                if (!this.imgUrl){
+                    Message.error('请输入或选择地址')
+                    return false
+                }
+                if (!this.imgNum){
+                    Message.error('请输入数量')
+                    return false
+                }
                 this.imgList = []
+                this.isSave = false
                 // captcha_url= https://uac.10010.com/portal/Service/CreateImage &loops=2
                 if (this.imgNum <= 10) {
-                    this.getDataList(this.imgNum)
+                    this.percentNum = 10
+                    this.getDataList(this.imgNum).then(() => {
+                        this.percentNum = 100
+                        this.percentNum = 0
+                    })
                     return false
                 }
                 let defaultNum = 1
@@ -130,9 +143,10 @@
                 if (numSplit <= num) {
                     this.getDataList(10).then(() => {
                         this.percentNum = Math.floor((numSplit / num) * 100)
+                        if (!lastNum && (numSplit === num)) this.percentNum = 0
                         this.splitData(++numSplit, num, lastNum)
                     })
-                } else if (lastNum >= 1) {
+                } else if (lastNum) {
                     this.getDataList(lastNum).then(() => {
                         this.percentNum = 100
                         this.percentNum = 0
@@ -151,7 +165,6 @@
                         }
                     ]
                     this.imgList = [...this.imgList, ...res.data]
-                    this.isSave = false
                     return this.imgList
                 }, () => {
                     this.isSave = true
@@ -232,7 +245,7 @@
                 color: #2d8cf0;
             }
             /deep/ .inputColor > input {
-                color: #ccc;
+                color: #515a6e;
             }
         }
     }
